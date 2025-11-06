@@ -98,23 +98,23 @@ function App() {
   }, [])
 
   return (
-    <div className="min-h-screen w-screen bg-white text-slate-900 flex items-center justify-center">
-      <div className="w-full max-w-3xl px-4">
-        <div className="absolute top-4 right-4">
+    <div className="min-h-screen w-screen bg-white text-slate-900 flex items-center justify-center py-4 sm:py-8">
+      <div className="w-full max-w-3xl px-4 sm:px-6">
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
           <button
             onClick={() => i18n.changeLanguage(i18n.language === 'ko' ? 'en' : 'ko')}
-            className="text-sm px-3 py-1.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+            className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             aria-label="Switch language"
           >
             {i18n.language === 'ko' ? 'English' : '한국어'}
           </button>
         </div>
-        <div className="flex items-center justify-center mb-8">
-          <img src={logo} alt={t('title')} className="h-24 w-auto" />
+        <div className="flex items-center justify-center mb-6 sm:mb-8">
+          <img src={logo} alt={t('title')} className="h-16 sm:h-20 md:h-24 w-auto" />
         </div>
         <div className="rounded-2xl border border-slate-200 shadow-sm p-2">
           <textarea
-            className="w-full min-h-40 resize-none rounded-xl p-5 text-lg bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-slate-300"
+            className="w-full min-h-32 sm:min-h-40 resize-none rounded-xl p-4 sm:p-5 text-base sm:text-lg bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-slate-300"
             placeholder={t('placeholder')}
             value={userPrompt}
             onChange={(e) => setUserPrompt(e.target.value)}
@@ -123,17 +123,17 @@ function App() {
           />
           
         </div>
-        <div className="flex items-center justify-center gap-3 mt-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mt-4">
           <button
             onClick={handleSubmit}
             disabled={isLoading || !userPrompt.trim() || (remaining !== null && remaining <= 0) || isLoadingRate}
-            className="px-4 py-2 rounded-lg bg-slate-900 text-white disabled:opacity-50"
+            className="w-full sm:w-auto px-6 py-2.5 sm:px-4 sm:py-2 rounded-lg bg-slate-900 text-white disabled:opacity-50 text-base sm:text-sm"
           >
             {isLoading ? t('enhancing') : t('submit')}
           </button>
-          {error && <span className="text-sm text-red-600">{error}</span>}
+          {error && <span className="text-xs sm:text-sm text-red-600 text-center">{error}</span>}
         </div>
-        <div className="mt-2 text-center text-sm text-slate-600 min-h-[20px]">
+        <div className="mt-2 text-center text-xs sm:text-sm text-slate-600 min-h-[20px] px-2">
           {isLoadingRate ? (
             <span className="text-slate-400">{t('loading')}</span>
           ) : remaining !== null && remaining > 0 ? (
@@ -144,16 +144,16 @@ function App() {
         </div>
 
         {enhanced && (
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-medium">{t('enhancedPrompt')}</h2>
+          <div className="mt-4 sm:mt-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-2">
+              <h2 className="text-base sm:text-lg font-medium">{t('enhancedPrompt')}</h2>
               <button
                 onClick={async () => {
                   await navigator.clipboard.writeText(enhanced)
                   setCopied(true)
                   setTimeout(() => setCopied(false), 1500)
                 }}
-                className={`text-sm px-3 py-1 rounded-md border border-slate-200 ${
+                className={`text-xs sm:text-sm px-3 py-1.5 sm:py-1 rounded-md border border-slate-200 w-full sm:w-auto ${
                   copied ? 'bg-emerald-100 text-emerald-900' : 'bg-white hover:bg-slate-50'
                 }`}
                 aria-live="polite"
@@ -161,8 +161,8 @@ function App() {
                 {copied ? t('copied') : t('copy')}
               </button>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <pre className="whitespace-pre-wrap break-words text-slate-900">{enhanced}</pre>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
+              <pre className="whitespace-pre-wrap break-words text-slate-900 text-sm sm:text-base">{enhanced}</pre>
             </div>
           </div>
         )}
