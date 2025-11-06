@@ -133,7 +133,6 @@ function App() {
           </button>
           {error && <span className="text-sm text-red-600">{error}</span>}
         </div>
-        <div className="mt-1 text-center text-xs text-slate-500">{t('keyboardHint')}</div>
         <div className="mt-2 text-center text-sm text-slate-600 min-h-[20px]">
           {isLoadingRate ? (
             <span className="text-slate-400">{t('loading')}</span>
