@@ -9,15 +9,17 @@ export default async function handler(request) {
   }
 
   try {
-    const { getFingerprint, readDailyStatus } = await import('./_lib/limit.js')
+    const { getFingerprint, readDailyStatus, getCountry } = await import('./_lib/limit.js')
     const fp = await getFingerprint(request)
     const status = await readDailyStatus(fp)
+    const country = getCountry(request)
     return new Response(
       JSON.stringify({
         remaining: status.remaining,
         limit: status.limit,
         reset_seconds: status.ttl,
         count: status.count,
+        country: country,
       }),
       {
         status: 200,
@@ -26,6 +28,7 @@ export default async function handler(request) {
           'x-rate-limit': String(status.limit),
           'x-rate-remaining': String(status.remaining),
           'x-rate-reset': String(status.ttl),
+          'x-country': country,
         },
       },
     )

@@ -38,6 +38,13 @@ export async function getFingerprint(request) {
   return await hmacSHA256Hex(secret, basis)
 }
 
+// Extract country from Cloudflare/Vercel headers (if available)
+export function getCountry(request) {
+  return request.headers.get('cf-ipcountry') || 
+         request.headers.get('x-vercel-ip-country') || 
+         'unknown'
+}
+
 async function upstash(cmd, ...args) {
   const url = process.env.UPSTASH_REDIS_REST_URL
   const token = process.env.UPSTASH_REDIS_REST_TOKEN

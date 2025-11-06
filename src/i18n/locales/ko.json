@@ -1,0 +1,17 @@
+{
+  "placeholder": "프롬프트를 입력하고 ⌘⏎ (또는 Ctrl+Enter)를 누르세요",
+  "submit": "확인",
+  "enhancing": "개선 중…",
+  "keyboardHint": "⌘⏎ 또는 Ctrl+Enter를 누르세요",
+  "loading": "로딩 중…",
+  "remaining": "오늘 {{count}}회 남았습니다",
+  "limitReached": "일일 한도 도달. 새 크레딧은 {{time}} 후 (00:00 UTC)에 제공됩니다",
+  "enhancedPrompt": "개선된 프롬프트",
+  "copy": "복사",
+  "copied": "복사됨!",
+  "error": {
+    "dailyLimit": "일일 한도 도달 ({{limit}}회). {{time}} 후에 재설정됩니다.",
+    "somethingWrong": "문제가 발생했습니다"
+  }
+}
+

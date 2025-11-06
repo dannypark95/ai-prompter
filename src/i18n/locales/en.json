@@ -1,0 +1,17 @@
+{
+  "placeholder": "Enter your prompt and press ⌘⏎ (or Ctrl+Enter)",
+  "submit": "Submit",
+  "enhancing": "Enhancing…",
+  "keyboardHint": "Press ⌘⏎ or Ctrl+Enter",
+  "loading": "Loading…",
+  "remaining": "You have {{count}} free {{count, plural, one {use} other {uses}}} left today",
+  "limitReached": "Daily limit reached. New credits in {{time}} (00:00 UTC)",
+  "enhancedPrompt": "Enhanced prompt",
+  "copy": "Copy",
+  "copied": "Copied!",
+  "error": {
+    "dailyLimit": "Daily limit reached ({{limit}}). Resets in {{time}}.",
+    "somethingWrong": "Something went wrong"
+  }
+}
+
