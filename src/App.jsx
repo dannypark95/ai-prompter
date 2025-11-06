@@ -8,14 +8,14 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [enhanced, setEnhanced] = useState('')
   const [copied, setCopied] = useState(false)
-  const [remaining, setRemaining] = useState(getRemaining())
+  const [remaining, setRemaining] = useState(null) // null = loading, number = loaded
   const [error, setError] = useState('')
   const [countdown, setCountdown] = useState(formatDurationHMS(msUntilReset()))
-  
+  const [isLoadingRate, setIsLoadingRate] = useState(true)
 
   async function handleSubmit() {
     if (!userPrompt.trim() || isLoading) return
-    if (remaining <= 0) {
+    if (remaining !== null && remaining <= 0) {
       setError(`Daily limit reached (${DAILY_LIMIT}). Resets in ${formatDuration(msUntilReset())}.`)
       return
     }
@@ -47,7 +47,7 @@ function App() {
 
   // Live countdown when limit reached
   useEffect(() => {
-    if (remaining > 0) return
+    if (remaining === null || remaining > 0) return
     setCountdown(formatDurationHMS(msUntilReset()))
     const id = setInterval(() => {
       setCountdown(formatDurationHMS(msUntilReset()))
@@ -64,10 +64,19 @@ function App() {
           const json = await resp.json()
           if (typeof json.remaining === 'number') {
             setRemaining(Math.max(0, json.remaining))
+          } else {
+            // Fallback to local if server doesn't return remaining
+            setRemaining(getRemaining())
           }
+        } else {
+          // Fallback to local on error
+          setRemaining(getRemaining())
         }
       } catch {
-        // ignore; fallback to local remaining
+        // Fallback to local remaining
+        setRemaining(getRemaining())
+      } finally {
+        setIsLoadingRate(false)
       }
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,7 +100,7 @@ function App() {
         <div className="flex items-center justify-center gap-3 mt-4">
           <button
             onClick={handleSubmit}
-            disabled={isLoading || !userPrompt.trim() || remaining <= 0}
+            disabled={isLoading || !userPrompt.trim() || (remaining !== null && remaining <= 0) || isLoadingRate}
             className="px-4 py-2 rounded-lg bg-slate-900 text-white disabled:opacity-50"
           >
             {isLoading ? 'Enhancing…' : 'Submit'}
@@ -99,13 +108,14 @@ function App() {
           {error && <span className="text-sm text-red-600">{error}</span>}
         </div>
         <div className="mt-1 text-center text-xs text-slate-500">Press ⌘⏎ or Ctrl+Enter</div>
-        <div className="mt-2 text-center text-sm text-slate-600">
-          {remaining > 0
-            ? (
-              <>You have {remaining} free {remaining === 1 ? 'use' : 'uses'} left today</>
-            ) : (
-              <>Daily limit reached. New credits in {countdown} (00:00 UTC)</>
-            )}
+        <div className="mt-2 text-center text-sm text-slate-600 min-h-[20px]">
+          {isLoadingRate ? (
+            <span className="text-slate-400">Loading…</span>
+          ) : remaining !== null && remaining > 0 ? (
+            <>You have {remaining} free {remaining === 1 ? 'use' : 'uses'} left today</>
+          ) : remaining !== null && remaining === 0 ? (
+            <>Daily limit reached. New credits in {countdown} (00:00 UTC)</>
+          ) : null}
         </div>
 
         {enhanced && (
