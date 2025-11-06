@@ -110,7 +110,7 @@ function App() {
           </button>
         </div>
         <div className="flex items-center justify-center mb-8">
-          <img src={logo} alt={t('title')} className="h-16 w-auto" />
+          <img src={logo} alt={t('title')} className="h-24 w-auto" />
         </div>
         <div className="rounded-2xl border border-slate-200 shadow-sm p-2">
           <textarea
