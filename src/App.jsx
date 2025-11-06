@@ -55,6 +55,24 @@ function App() {
     return () => clearInterval(id)
   }, [remaining])
 
+  // Sync remaining with server on first load
+  useEffect(() => {
+    (async () => {
+      try {
+        const resp = await fetch('/api/rate')
+        if (resp.ok) {
+          const json = await resp.json()
+          if (typeof json.remaining === 'number') {
+            setRemaining(Math.max(0, json.remaining))
+          }
+        }
+      } catch {
+        // ignore; fallback to local remaining
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <div className="min-h-screen w-screen bg-white text-slate-900 flex items-center justify-center">
       <div className="w-full max-w-3xl px-4">

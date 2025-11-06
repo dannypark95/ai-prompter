@@ -75,4 +75,26 @@ export async function checkAndIncrementDailyLimit(fingerprint) {
   return { allowed: count <= limit, count, limit, remaining, ttl }
 }
 
+export async function readDailyStatus(fingerprint) {
+  const limit = parseInt(process.env.RATE_LIMIT_DAILY || '5', 10)
+  const day = getUtcDayKey()
+  const key = `rl:${fingerprint}:${day}`
+  let count = 0
+  try {
+    const val = await upstash('GET', key)
+    count = val ? parseInt(val, 10) || 0 : 0
+  } catch {
+    count = 0
+  }
+  let ttl = 0
+  try {
+    const t = await upstash('TTL', key)
+    ttl = typeof t === 'number' && t > 0 ? t : secondsUntilNextUtcMidnight()
+  } catch {
+    ttl = secondsUntilNextUtcMidnight()
+  }
+  const remaining = Math.max(0, limit - count)
+  return { count, remaining, limit, ttl }
+}
+
 
