@@ -22,10 +22,14 @@ function App() {
     try {
       setIsLoading(true)
       setError('')
-      const improved = await enhancePromptWithGpt4oMini(userPrompt)
-      setEnhanced(improved)
-      const usage = recordUse()
-      setRemaining(Math.max(0, DAILY_LIMIT - usage.count))
+      const result = await enhancePromptWithGpt4oMini(userPrompt)
+      setEnhanced(result.text)
+      if (result.meta && typeof result.meta.remaining === 'number') {
+        setRemaining(Math.max(0, result.meta.remaining))
+      } else {
+        const usage = recordUse()
+        setRemaining(Math.max(0, DAILY_LIMIT - usage.count))
+      }
     } catch (err) {
       setError(err.message || 'Something went wrong')
     } finally {
@@ -76,6 +80,7 @@ function App() {
           </button>
           {error && <span className="text-sm text-red-600">{error}</span>}
         </div>
+        <div className="mt-1 text-center text-xs text-slate-500">Press ⌘⏎ or Ctrl+Enter</div>
         <div className="mt-2 text-center text-sm text-slate-600">
           {remaining > 0
             ? (

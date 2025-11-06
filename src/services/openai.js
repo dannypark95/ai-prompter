@@ -13,7 +13,17 @@ export async function enhancePromptWithGpt4oMini(userPrompt, styleKey = 'detaile
       throw new Error(err.detail || err.error || `Server error ${resp.status}`)
     }
     const json = await resp.json()
-    return (json.text || '').trim()
+    const remainingHeader = resp.headers.get('x-rate-remaining')
+    const resetHeader = resp.headers.get('x-rate-reset')
+    const limitHeader = resp.headers.get('x-rate-limit')
+    return {
+      text: (json.text || '').trim(),
+      meta: {
+        remaining: remainingHeader != null ? Number(remainingHeader) : undefined,
+        resetSeconds: resetHeader != null ? Number(resetHeader) : undefined,
+        limit: limitHeader != null ? Number(limitHeader) : undefined,
+      }
+    }
   }
 
   // Local dev direct call template with style instructions
@@ -73,7 +83,7 @@ export async function enhancePromptWithGpt4oMini(userPrompt, styleKey = 'detaile
     improved = data.choices?.[0]?.message?.content
   }
 
-  return (improved || '').trim()
+  return { text: (improved || '').trim() }
 }
 
 

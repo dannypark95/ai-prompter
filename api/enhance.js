@@ -50,11 +50,14 @@ export default async function handler(request) {
           remaining: 0,
           limit: result.limit,
         }),
-        { status: 429, headers: { 'Content-Type': 'application/json' } },
+        { status: 429, headers: { 'Content-Type': 'application/json', 'x-rate-limit': String(result.limit), 'x-rate-remaining': '0', 'x-rate-reset': String(result.ttl) } },
       )
     }
+    // Attach rate headers on success path as well
+    var rateHeaders = { 'x-rate-limit': String(result.limit), 'x-rate-remaining': String(result.remaining), 'x-rate-reset': String(result.ttl) }
   } catch (e) {
     // If Upstash is not configured, proceed without blocking (but do not crash)
+    var rateHeaders = {}
   }
 
   const STYLE_INSTRUCTIONS = {
@@ -110,7 +113,7 @@ export default async function handler(request) {
 
   return new Response(JSON.stringify({ text: (improved || '').trim() }), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...rateHeaders },
   })
 }
 
