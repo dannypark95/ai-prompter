@@ -137,7 +137,7 @@ function App() {
           {isLoadingRate ? (
             <span className="text-slate-400">{t('loading')}</span>
           ) : remaining !== null && remaining > 0 ? (
-            t('remaining', { count: remaining })
+            remaining === 1 ? t('remaining_one', { count: remaining }) : t('remaining_other', { count: remaining })
           ) : remaining !== null && remaining === 0 ? (
             t('limitReached', { time: countdown })
           ) : null}
