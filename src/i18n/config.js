@@ -4,8 +4,11 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 import enTranslations from './locales/en.json'
 import koTranslations from './locales/ko.json'
 
+// Fix for Vite/ES modules compatibility
+const detector = LanguageDetector.default || LanguageDetector
+
 i18n
-  .use(LanguageDetector)
+  .use(detector)
   .use(initReactI18next)
   .init({
     resources: {
