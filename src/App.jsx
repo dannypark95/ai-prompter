@@ -60,49 +60,40 @@ function App() {
 
   // Sync remaining with server on first load and detect country for language
   useEffect(() => {
-    (async () => {
+    async function fetchRateAndDetectLanguage() {
       try {
         const resp = await fetch('/api/rate')
         if (resp.ok) {
           const json = await resp.json()
+          
+          // Update remaining count
           if (typeof json.remaining === 'number') {
             setRemaining(Math.max(0, json.remaining))
           } else {
-            // Fallback to local if server doesn't return remaining
             setRemaining(getRemaining())
           }
+          
+          // Detect country and set language if Korea
+          const country = json.country || resp.headers.get('x-country')
+          if (country === 'KR' && i18n.language !== 'ko') {
+            i18n.changeLanguage('ko').catch(() => {})
+          }
         } else {
-          // Fallback to local on error
           setRemaining(getRemaining())
         }
       } catch {
-        // Fallback to local remaining
+        // Fallback: check browser language and local remaining
         setRemaining(getRemaining())
+        const browserLang = navigator.language || navigator.userLanguage
+        if (browserLang.startsWith('ko') && i18n.language !== 'ko') {
+          i18n.changeLanguage('ko').catch(() => {})
+        }
       } finally {
         setIsLoadingRate(false)
       }
-    })()
+    }
     
-    // Detect country from server and set language if Korea
-    (async () => {
-      try {
-        const resp = await fetch('/api/rate')
-        if (resp.ok) {
-          const json = await resp.json()
-          const country = json.country || resp.headers.get('x-country')
-          // If user is from Korea, switch to Korean
-          if (country === 'KR' && i18n.language !== 'ko') {
-            i18n.changeLanguage('ko')
-          }
-        }
-      } catch {
-        // Fallback: check browser language
-        const browserLang = navigator.language || navigator.userLanguage
-        if (browserLang.startsWith('ko') && i18n.language !== 'ko') {
-          i18n.changeLanguage('ko')
-        }
-      }
-    })()
+    fetchRateAndDetectLanguage()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
