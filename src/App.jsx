@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import { enhancePromptWithGpt4oMini } from './services/openai.js'
-import { DAILY_LIMIT, getRemaining, recordUse, msUntilReset, formatDuration } from './utils/usageLimit.js'
+import { DAILY_LIMIT, getRemaining, recordUse, msUntilReset, formatDuration, formatDurationHMS } from './utils/usageLimit.js'
 
 function App() {
   const [userPrompt, setUserPrompt] = useState('')
@@ -10,6 +10,8 @@ function App() {
   const [copied, setCopied] = useState(false)
   const [remaining, setRemaining] = useState(getRemaining())
   const [error, setError] = useState('')
+  const [countdown, setCountdown] = useState(formatDurationHMS(msUntilReset()))
+  
 
   async function handleSubmit() {
     if (!userPrompt.trim() || isLoading) return
@@ -39,6 +41,16 @@ function App() {
     }
   }
 
+  // Live countdown when limit reached
+  useEffect(() => {
+    if (remaining > 0) return
+    setCountdown(formatDurationHMS(msUntilReset()))
+    const id = setInterval(() => {
+      setCountdown(formatDurationHMS(msUntilReset()))
+    }, 1000)
+    return () => clearInterval(id)
+  }, [remaining])
+
   return (
     <div className="min-h-screen w-screen bg-white text-slate-900 flex items-center justify-center">
       <div className="w-full max-w-3xl px-4">
@@ -52,6 +64,7 @@ function App() {
             onKeyDown={handleKeyDown}
             disabled={isLoading}
           />
+          
         </div>
         <div className="flex items-center justify-center gap-3 mt-4">
           <button
@@ -61,8 +74,15 @@ function App() {
           >
             {isLoading ? 'Enhancing…' : 'Submit'}
           </button>
-          <span className="text-sm text-slate-600">{remaining} left today</span>
           {error && <span className="text-sm text-red-600">{error}</span>}
+        </div>
+        <div className="mt-2 text-center text-sm text-slate-600">
+          {remaining > 0
+            ? (
+              <>You have {remaining} free {remaining === 1 ? 'use' : 'uses'} left today</>
+            ) : (
+              <>Daily limit reached. New credits in {countdown} (00:00 UTC)</>
+            )}
         </div>
 
         {enhanced && (

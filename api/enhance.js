@@ -27,6 +27,8 @@ export default async function handler(request) {
   }
 
   const userPrompt = (body && body.prompt) || ''
+  const styleKey = 'detailed'
+  const typeKey = (body && body.type) || 'rewrite'
   if (!userPrompt || typeof userPrompt !== 'string') {
     return new Response(JSON.stringify({ error: 'Missing prompt' }), {
       status: 400,
@@ -34,10 +36,48 @@ export default async function handler(request) {
     })
   }
 
+  // Server-enforced daily rate limit (Upstash Redis)
+  try {
+    const { getFingerprint, checkAndIncrementDailyLimit, secondsUntilNextUtcMidnight } = await import('./_lib/limit.js')
+    const fp = await getFingerprint(request)
+    const result = await checkAndIncrementDailyLimit(fp)
+    if (!result.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: 'rate_limited',
+          detail: 'Daily limit reached',
+          reset_seconds: result.ttl,
+          remaining: 0,
+          limit: result.limit,
+        }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
+  } catch (e) {
+    // If Upstash is not configured, proceed without blocking (but do not crash)
+  }
+
+  const STYLE_INSTRUCTIONS = {
+    detailed:
+      "Be thorough and explicit with steps, inputs, outputs, and constraints. Return only the improved prompt.",
+  }
+
+  const TYPE_INSTRUCTIONS = {
+    rewrite: "Improve and clarify the user's prompt without changing intent.",
+    summarize: "Summarize the content clearly, preserving key facts and constraints.",
+    brainstorm: "Generate multiple creative approaches or ideas relevant to the prompt.",
+  }
+
+  const styleInstruction = STYLE_INSTRUCTIONS.detailed
+  const typeInstruction = TYPE_INSTRUCTIONS[typeKey] || TYPE_INSTRUCTIONS.rewrite
+
   const requestBody = {
     model: 'gpt-4o-mini',
-    input:
-      "Improve this prompt so an AI follows it precisely. Keep the user's intent, clarify steps, add constraints when helpful, and avoid changing meaning. Return only the improved prompt.\n\nUser prompt:\n" + userPrompt,
+    instructions:
+      typeInstruction +
+      " Ensure the AI follows it precisely. Keep the user's intent, clarify steps, add constraints when helpful, and avoid changing meaning. " +
+      styleInstruction,
+    input: userPrompt,
     temperature: 0.2,
   }
 
