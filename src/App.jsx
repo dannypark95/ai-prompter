@@ -136,8 +136,6 @@ function App() {
         <div className="mt-2 text-center text-xs sm:text-sm text-slate-600 min-h-[20px] px-2">
           {isLoadingRate ? (
             <span className="text-slate-400">{t('loading')}</span>
-          ) : remaining !== null && remaining > 0 ? (
-            remaining === 1 ? t('remaining_one', { count: remaining }) : t('remaining_other', { count: remaining })
           ) : remaining !== null && remaining === 0 ? (
             t('limitReached', { time: countdown })
           ) : null}
