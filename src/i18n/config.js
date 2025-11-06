@@ -5,7 +5,7 @@ import enTranslations from './locales/en.json'
 import koTranslations from './locales/ko.json'
 
 i18n
-  .use(LanguageDetector) // Detects user's language from browser/headers
+  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
@@ -14,12 +14,11 @@ i18n
     },
     fallbackLng: 'en',
     detection: {
-      // Check browser language, then country code from headers
       order: ['navigator', 'htmlTag', 'path', 'subdomain'],
       caches: ['localStorage'],
     },
     interpolation: {
-      escapeValue: false, // React already escapes
+      escapeValue: false,
     },
   })
 

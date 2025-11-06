@@ -1,5 +1,6 @@
 {
-  "placeholder": "Enter your prompt and press ⌘⏎ (or Ctrl+Enter)",
+  "title": "AI Prompt Enhancer",
+  "placeholder": "Type your prompt and press ⌘⏎ (or Ctrl+Enter)",
   "submit": "Submit",
   "enhancing": "Enhancing…",
   "keyboardHint": "Press ⌘⏎ or Ctrl+Enter",
