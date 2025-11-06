@@ -16,6 +16,8 @@ A web application that improves and optimizes AI prompts using GPT-4o mini. User
 - ✅ Server-side rate limiting with Redis (Upstash)
 - ✅ Secure API key handling (never exposed to client)
 - ✅ Real-time remaining quota display with countdown
+- ✅ Vercel Analytics integration (traffic monitoring)
+- ✅ Privacy-friendly custom analytics (referrers, countries, browsers)
 - ✅ Keyboard shortcuts (⌘⏎ / Ctrl+Enter)
 - ✅ Copy-to-clipboard for enhanced prompts
 - ✅ Responsive design with Tailwind CSS
@@ -32,6 +34,7 @@ A web application that improves and optimizes AI prompts using GPT-4o mini. User
 **Key Components:**
 
 - `src/App.jsx` - Main UI component
+- `src/main.jsx` - App entry point with Vercel Analytics integration
 - `src/services/openai.js` - API client (calls server endpoint in production)
 - `src/utils/usageLimit.js` - Client-side UX counter (server is source of truth)
 
@@ -56,6 +59,7 @@ A web application that improves and optimizes AI prompts using GPT-4o mini. User
 | Backend   | Vercel Edge Functions | Serverless API endpoints      |
 | Database  | Upstash Redis         | Rate limiting storage         |
 | AI Model  | OpenAI GPT-4o mini    | Prompt enhancement            |
+| Analytics | Vercel Analytics      | Real-time traffic monitoring  |
 | Hosting   | Vercel                | Frontend + backend deployment |
 
 ## 📋 Prerequisites
@@ -399,20 +403,29 @@ GET /api/analytics?days=7
 
 ### Monitoring Best Practices
 
-#### 1. **Vercel Analytics (Recommended)**
+#### 1. **Vercel Analytics (✅ Integrated)**
 
-Enable Vercel Analytics for automatic monitoring:
+Vercel Analytics is already integrated in the codebase. To enable it:
 
-1. Go to Vercel Dashboard → Project → Analytics
-2. Enable "Web Analytics" (free tier available)
-3. Get automatic page views, unique visitors, top referrers
+1. **Deploy your changes** (the `<Analytics />` component is already added to `src/main.jsx`)
+2. Go to Vercel Dashboard → Project → Analytics
+3. Click "Enable Web Analytics" (free tier available)
+4. Wait ~30 seconds after visiting your site
 
-**Benefits:**
+**What's Already Set Up:**
 
-- Zero code changes
-- Real-time dashboard
-- Geographic breakdown
-- Device/browser stats
+- ✅ `@vercel/analytics` package installed
+- ✅ `<Analytics />` component added to `src/main.jsx`
+- ✅ Automatic page view tracking (no additional code needed)
+
+**What You Get:**
+
+- Real-time page views and unique visitors
+- Top referrers (where traffic comes from)
+- Geographic breakdown (countries)
+- Device/browser statistics
+- Page performance metrics
+- Zero configuration needed (just enable in dashboard)
 
 #### 2. **Error Tracking (Sentry)**
 
@@ -521,11 +534,13 @@ Consider building a simple dashboard to visualize:
 
 ### Immediate Actions (Production Ready)
 
-1. **Enable Vercel Analytics**
+1. **Enable Vercel Analytics** ✅ (Code already integrated)
 
+   - Deploy your latest changes (includes `<Analytics />` component)
    - Go to Vercel Dashboard → Project → Analytics
-   - Enable Web Analytics (free tier)
-   - Get automatic traffic insights
+   - Click "Enable Web Analytics" (free tier)
+   - Visit your site to start collecting data
+   - View real-time analytics in the dashboard
 
 2. **Set Up Monitoring Alerts**
 
@@ -611,12 +626,13 @@ Consider building a simple dashboard to visualize:
 - **Production:** Client calls `/api/enhance` (secure, rate-limited)
 - **Rate Limit:** Server is source of truth; client counter is UX-only
 - **Reset Time:** Daily limit resets at 00:00 UTC (not local midnight)
-- **Analytics:** Non-blocking, privacy-friendly, stored in Redis
+- **Analytics:** Vercel Analytics integrated + custom Redis tracking (non-blocking, privacy-friendly)
 
 ## 🔄 Future Improvements
 
 - [x] Basic analytics tracking (referrers, countries, browsers)
-- [ ] Analytics dashboard UI
+- [x] Vercel Analytics integration
+- [ ] Analytics dashboard UI (custom Redis-based dashboard)
 - [ ] Add user authentication (email/social login)
 - [ ] Per-user rate limits (instead of IP-based)
 - [ ] Error tracking (Sentry integration)
