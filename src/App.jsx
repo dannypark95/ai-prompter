@@ -133,13 +133,11 @@ function App() {
           </button>
           {error && <span className="text-xs sm:text-sm text-red-600 text-center">{error}</span>}
         </div>
-        <div className="mt-2 text-center text-xs sm:text-sm text-slate-600 min-h-[20px] px-2">
-          {isLoadingRate ? (
-            <span className="text-slate-400">{t('loading')}</span>
-          ) : remaining !== null && remaining === 0 ? (
-            t('limitReached', { time: countdown })
-          ) : null}
-        </div>
+        {remaining !== null && remaining === 0 && (
+          <div className="mt-2 text-center text-xs sm:text-sm text-slate-600 px-2">
+            {t('limitReached', { time: countdown })}
+          </div>
+        )}
 
         {enhanced && (
           <div className="mt-4 sm:mt-6">
