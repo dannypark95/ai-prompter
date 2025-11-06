@@ -36,6 +36,18 @@ export default async function handler(request) {
     })
   }
 
+  // Track analytics (non-blocking, fire-and-forget)
+  try {
+    const { trackEvent, getReferrerDomain, getCountry } = await import('./_lib/analytics.js')
+    trackEvent('enhance', {
+      referrer: request.headers.get('referer'),
+      country: getCountry(request),
+      userAgent: request.headers.get('user-agent'),
+    }).catch(() => {}) // Don't block on analytics errors
+  } catch {
+    // Analytics optional, don't fail if not configured
+  }
+
   // Server-enforced daily rate limit (Upstash Redis)
   try {
     const { getFingerprint, checkAndIncrementDailyLimit, secondsUntilNextUtcMidnight } = await import('./_lib/limit.js')

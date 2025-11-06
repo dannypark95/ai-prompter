@@ -347,18 +347,279 @@ ai-prompter/
 - Check browser console for errors
 - Verify `/api/rate` endpoint returns correct data
 
+## 📊 Analytics & Monitoring
+
+### Built-in Analytics
+
+The app includes privacy-friendly analytics that track usage patterns without storing personal data.
+
+**What's Tracked:**
+
+- ✅ Request counts (daily/hourly aggregates)
+- ✅ Referrer domains (e.g., `google.com`, `twitter.com`, `direct`)
+- ✅ Country (from Cloudflare/Vercel headers)
+- ✅ Browser category (Chrome, Firefox, Safari, etc.)
+- ❌ No IP addresses stored
+- ❌ No personal data collected
+- ❌ No full URLs stored (only domains)
+
+**How It Works:**
+
+- Analytics are stored in Redis with automatic expiration (7-30 days)
+- Non-blocking (fire-and-forget, doesn't slow down requests)
+- GDPR-friendly (aggregated data only)
+
+### Viewing Analytics
+
+**API Endpoint:**
+
+```bash
+GET /api/analytics?days=7
+```
+
+**Response:**
+
+```json
+{
+  "summary": [
+    { "date": "2025-01-15", "requests": 42 },
+    { "date": "2025-01-16", "requests": 38 },
+    ...
+  ]
+}
+```
+
+**Redis Keys (for manual inspection):**
+
+- `analytics:enhance:day:{YYYY-MM-DD}` - Daily request counts
+- `analytics:enhance:hour:{YYYY-MM-DD:HH}` - Hourly request counts
+- `analytics:referrer:{domain}:day:{YYYY-MM-DD}` - Referrer stats
+- `analytics:country:{code}:day:{YYYY-MM-DD}` - Country stats
+- `analytics:browser:{category}:day:{YYYY-MM-DD}` - Browser stats
+
+### Monitoring Best Practices
+
+#### 1. **Vercel Analytics (Recommended)**
+
+Enable Vercel Analytics for automatic monitoring:
+
+1. Go to Vercel Dashboard → Project → Analytics
+2. Enable "Web Analytics" (free tier available)
+3. Get automatic page views, unique visitors, top referrers
+
+**Benefits:**
+
+- Zero code changes
+- Real-time dashboard
+- Geographic breakdown
+- Device/browser stats
+
+#### 2. **Error Tracking (Sentry)**
+
+For production error monitoring:
+
+```bash
+npm install @sentry/vercel-edge
+```
+
+Add to `api/enhance.js`:
+
+```javascript
+import * as Sentry from "@sentry/vercel-edge";
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.VERCEL_ENV,
+});
+```
+
+**Benefits:**
+
+- Automatic error capture
+- Stack traces
+- Performance monitoring
+- Release tracking
+
+#### 3. **Logging**
+
+**Vercel Runtime Logs:**
+
+- View in Vercel Dashboard → Project → Runtime Logs
+- See all Edge Function invocations
+- Filter by status code, function name
+
+**Custom Logging:**
+Add structured logging to track:
+
+- Request/response times
+- OpenAI API latency
+- Rate limit hits
+- Error patterns
+
+#### 4. **OpenAI Usage Monitoring**
+
+Monitor costs in real-time:
+
+1. OpenAI Dashboard → Usage
+2. Set up billing alerts
+3. Track tokens per request
+4. Monitor rate limits
+
+**Recommended Alerts:**
+
+- Daily spend > $X
+- Unusual token usage spikes
+- API error rate > 5%
+
+#### 5. **Upstash Redis Monitoring**
+
+**Upstash Dashboard:**
+
+- View command counts
+- Monitor bandwidth usage
+- Check storage size
+- Set up alerts for quota limits
+
+**Key Metrics to Watch:**
+
+- Redis command count (should stay under 500k/month on free tier)
+- Storage size (should stay under 256MB on free tier)
+- Error rate (should be near 0%)
+
+### Analytics Dashboard (Future)
+
+Consider building a simple dashboard to visualize:
+
+- Daily/weekly/monthly request trends
+- Top referrers
+- Geographic distribution
+- Browser/device breakdown
+- Peak usage hours
+
+**Tech Stack Options:**
+
+- **Simple:** React + Chart.js (hosted on Vercel)
+- **Advanced:** Next.js + Vercel Postgres (for historical data)
+- **Third-party:** Mixpanel, Amplitude, PostHog (if you need more features)
+
+### Privacy & Compliance
+
+**GDPR Compliance:**
+
+- ✅ No personal data stored (only aggregated stats)
+- ✅ No cookies used for tracking
+- ✅ IP addresses are hashed (fingerprint only)
+- ✅ Users can't be identified from analytics
+
+**Data Retention:**
+
+- Analytics keys expire automatically (7-30 days)
+- No permanent storage of user data
+- Can be cleared manually from Redis if needed
+
+## 🎯 Best Practices & Next Steps
+
+### Immediate Actions (Production Ready)
+
+1. **Enable Vercel Analytics**
+
+   - Go to Vercel Dashboard → Project → Analytics
+   - Enable Web Analytics (free tier)
+   - Get automatic traffic insights
+
+2. **Set Up Monitoring Alerts**
+
+   - OpenAI: Set daily spend limit ($5-10 recommended)
+   - Upstash: Monitor command count (stay under 500k/month)
+   - Vercel: Enable function error alerts
+
+3. **Review Analytics Weekly**
+   - Check `/api/analytics?days=7` endpoint
+   - Identify top referrers
+   - Monitor usage trends
+   - Adjust rate limits if needed
+
+### Short-term Improvements (1-2 weeks)
+
+1. **Error Tracking**
+
+   - Integrate Sentry for error monitoring
+   - Track OpenAI API failures
+   - Monitor rate limit hits
+
+2. **Performance Monitoring**
+
+   - Add response time logging
+   - Track OpenAI API latency
+   - Identify slow requests
+
+3. **Enhanced Analytics**
+   - Build simple dashboard UI
+   - Visualize trends (charts)
+   - Export data for analysis
+
+### Medium-term Enhancements (1-3 months)
+
+1. **User Authentication**
+
+   - Add email/social login (Auth0, Clerk, or NextAuth)
+   - Per-user rate limits (instead of IP-based)
+   - User preferences/history
+
+2. **Advanced Features**
+
+   - Multiple AI models (Claude, Gemini)
+   - Prompt templates/library
+   - Export/import functionality
+   - Dark mode
+
+3. **Scaling Considerations**
+   - Consider Vercel Postgres for historical analytics
+   - Implement caching for common prompts
+   - Add CDN for static assets
+
+### Security Checklist
+
+- [x] API keys stored server-side only
+- [x] Rate limiting enforced server-side
+- [x] Input validation on all endpoints
+- [x] HMAC fingerprinting (prevents spoofing)
+- [ ] CORS headers configured (if needed)
+- [ ] Content Security Policy (CSP) headers
+- [ ] Rate limit per IP (burst protection)
+- [ ] DDoS protection (Vercel provides basic)
+
+### Performance Optimization
+
+- [x] Edge Functions (low latency)
+- [x] Non-blocking analytics
+- [ ] Response caching (for identical prompts)
+- [ ] Request deduplication
+- [ ] Compression (gzip/brotli)
+
+### Cost Optimization
+
+- [x] Use cheapest model (gpt-4o-mini)
+- [x] Low temperature (0.2) for faster responses
+- [ ] Implement prompt caching (OpenAI feature)
+- [ ] Monitor and optimize token usage
+- [ ] Set hard spending limits
+
 ## 📝 Development Notes
 
 - **Local Dev:** Uses `VITE_OPENAI_API_KEY` for direct OpenAI calls (convenience)
 - **Production:** Client calls `/api/enhance` (secure, rate-limited)
 - **Rate Limit:** Server is source of truth; client counter is UX-only
 - **Reset Time:** Daily limit resets at 00:00 UTC (not local midnight)
+- **Analytics:** Non-blocking, privacy-friendly, stored in Redis
 
 ## 🔄 Future Improvements
 
+- [x] Basic analytics tracking (referrers, countries, browsers)
+- [ ] Analytics dashboard UI
 - [ ] Add user authentication (email/social login)
 - [ ] Per-user rate limits (instead of IP-based)
-- [ ] Analytics dashboard
+- [ ] Error tracking (Sentry integration)
 - [ ] Multiple model options (Claude, Gemini)
 - [ ] Prompt templates/library
 - [ ] Export/import prompts
